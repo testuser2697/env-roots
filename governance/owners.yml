@@ -5,8 +5,8 @@ environments:
            
   dev:
     owners:
-      - dev.user@company.com
-
+      - testuser2697@outlook.com
+      - testuser2697
   test:
     owners:
       - test.user@company.com
