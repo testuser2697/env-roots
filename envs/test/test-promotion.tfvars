@@ -6,5 +6,5 @@ promotion_reason      = "No-Op"
 # --- Executable intent (machine-enforced) ---
 approved_refs = {
   network  = "v1.0.2"
-  compute = "v1.0.0"
+  compute = "v1.0.1"
 }
