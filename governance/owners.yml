@@ -1,17 +1,13 @@
 environments:
-
   governance:
     owners:
       - governance-admin
-
   dev:
     owners:
       - testuser2697
-
   test:
     owners:
       - testuser2697
-
   prod:
     owners:
       - prod-owner
