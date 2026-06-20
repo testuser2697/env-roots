@@ -1,13 +1,17 @@
 environments:
   governance:
     owners:
-      - governance-admin
+     # no governance owners
+           
   dev:
     owners:
-      - testuser2697
+      - dev.user@company.com
+
   test:
     owners:
-      - testuser2697
+      - test.user@company.com
+
   prod:
     owners:
-      - prod-owner
+      - platform.admin@company.com
+      
