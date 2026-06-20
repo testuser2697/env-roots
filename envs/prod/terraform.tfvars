@@ -53,7 +53,7 @@ security_group_rules = {
 
 subnet_cidrs = {
   mgmt = " 10.52.3.0/24 "
-  data = "10.52.99.0/24"
+  data = "10.52.2.0/24"
   app  = " 10.52.1.0/24"
 }
 
