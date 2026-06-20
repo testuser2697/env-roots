@@ -12,7 +12,7 @@ module "network" {
   security_group_rules = var.security_group_rules
 }
 
-
+ 
 module "compute" {
   source            = "git::https://github.com/testuser2697/terraform-aws-module-compute.git?ref=v1.0.0"
   instances         = var.instances
