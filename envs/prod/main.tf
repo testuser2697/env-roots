@@ -12,7 +12,7 @@ module "network" {
 
 
 module "compute" {
-  source            = "git::https://github.com/testuser2697/terraform-aws-module-compute.git?ref=v1.0.0"
+  source            = "git::https://github.com/testuser2697/terraform-aws-module-compute.git?ref=v1.0.1"
   instances         = var.instances
   subnet_id         = module.network.app_subnet_id
   security_group_id = module.network.security_group_id
