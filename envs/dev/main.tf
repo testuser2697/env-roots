@@ -1,6 +1,6 @@
 #/*
 module "network" {
- source = "git::https://github.com/testuser2697/terraform-aws-module-network.git?ref=v1.0.1"
+ source = "git::https://github.com/testuser2697/terraform-aws-module-network.git?ref=v1.0.2"
  #"../../artifacts/published-modules/network/v1.0.0"
  #"../../artifacts/local-modules/network"
  prefix = local.prefix
