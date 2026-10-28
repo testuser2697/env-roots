@@ -3,10 +3,12 @@ environments:
     owners:
       - governance-admin
       - testuser2697
+      - bob
 
   dev:
     owners:
       - testuser2697
+      - bob
 
   test:
     owners:
