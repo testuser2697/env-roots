@@ -2,6 +2,7 @@ environments:
   governance:
     owners:
       - governance-admin
+      - bob
 
   dev:
     owners:
