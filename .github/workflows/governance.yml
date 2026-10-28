@@ -14,11 +14,6 @@ jobs:
     name: Governance-of-governance gate
     runs-on: ubuntu-latest
     steps:
-      - name: Check out pull request code
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-
       - name: Validate governance ownership
         shell: pwsh
         env:
@@ -26,6 +21,7 @@ jobs:
           REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           $ErrorActionPreference = 'Stop'
           if ($env:EVENT_NAME -ne 'pull_request') {
@@ -33,7 +29,7 @@ jobs:
             exit 0
           }
 
-          # Use the PR files API rather than HEAD^1, so multi-commit PRs work.
+          # All PRs run this job so it can be a required status check.
           $files = @(gh api --paginate "repos/$env:REPO/pulls/$env:PR_NUMBER/files" --jq '.[].filename')
           if ($LASTEXITCODE -ne 0) { throw 'Could not list PR files.' }
           if ($files -notcontains 'governance/owners.yml') {
@@ -41,14 +37,21 @@ jobs:
             exit 0
           }
 
-          # Authoritative policy comes from the protected base branch, never the PR.
-          $encoded = gh api "repos/$env:REPO/contents/governance/owners.yml?ref=main" --jq '.content'
+          # Read the authoritative ownership policy from the PR base commit.
+          # Never trust ownership additions proposed within the PR itself.
+          $encoded = gh api "repos/$env:REPO/contents/governance/owners.yml?ref=$env:BASE_SHA" --jq '.content'
           if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($encoded)) {
-            throw 'Cannot read governance/owners.yml from main.'
+            throw 'Cannot read governance/owners.yml from the PR base commit.'
           }
-          $yamlText = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String(($encoded -replace '\s', '')))
+          $yamlText = [Text.Encoding]::UTF8.GetString(
+            [Convert]::FromBase64String(($encoded -replace '\s', ''))
+          )
 
-          # Restrict to the course's documented YAML structure.
+          # Parse the course's expected owners.yml structure:
+          # environments:
+          #   governance:
+          #     owners:
+          #       - github-username
           $lines = $yamlText -split "`n"
           $inEnvironments = $false
           $inGovernance = $false
@@ -73,24 +76,19 @@ jobs:
           }
           $owners = @($owners | Select-Object -Unique)
           if ($owners.Count -eq 0) {
-            throw 'GOVERNANCE BOOTSTRAP REQUIRED: no governance owners defined on main.'
+            throw 'GOVERNANCE BOOTSTRAP REQUIRED: no governance owners defined on the PR base commit.'
           }
 
-          # Check PR author AND the account performing the latest head push.
-          # This is an actor gate, not a substitute for independent PR approval.
+          # GitHub PR author is the identity checked by this training gate.
+          # Do not use commit.author.login: GitHub may map it to another account.
           $pr = gh api "repos/$env:REPO/pulls/$env:PR_NUMBER" | ConvertFrom-Json
           if ($LASTEXITCODE -ne 0) { throw 'Could not read PR metadata.' }
-          $author = [string]$pr.user.login
-          $headSha = [string]$pr.head.sha
-          $commit = gh api "repos/$env:REPO/commits/$headSha" | ConvertFrom-Json
-          if ($LASTEXITCODE -ne 0) { throw 'Could not read head commit metadata.' }
-          $pusher = [string]$commit.author.login
-          if ([string]::IsNullOrWhiteSpace($pusher)) {
-            throw 'Cannot verify the GitHub identity associated with the head commit.'
-          }
-          Write-Host "Governance owners on main: $($owners -join ', ')"
-          Write-Host "PR author: $author; head commit author: $pusher"
-          if ($owners -notcontains $author.ToLowerInvariant() -or $owners -notcontains $pusher.ToLowerInvariant()) {
-            throw 'GOVERNANCE BLOCK: PR author and head commit author must be existing governance owners.'
+          $author = ([string]$pr.user.login).ToLowerInvariant()
+          if ([string]::IsNullOrWhiteSpace($author)) { throw 'Cannot identify PR author.' }
+
+          Write-Host "Governance owners on base: $($owners -join ', ')"
+          Write-Host "PR author: $author"
+          if ($owners -notcontains $author) {
+            throw "GOVERNANCE BLOCK: PR author '$author' is not an existing governance owner."
           }
           Write-Host 'Governance-of-governance gate PASSED.'
