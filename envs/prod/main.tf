@@ -14,7 +14,7 @@ module "network" {
 
 
 module "compute" {
- source = "git::https://github.com/testuser2697/terraform-aws-module-compute.git?ref=v1.0.1"
+ source = "git::https://github.com/testuser2697/terraform-aws-module-compute.git?ref=v1.0.0"
  #"../../artifacts/published-modules/compute/v1.0.0"
  #"../../artifacts/local-modules/compute"
  instances = var.instances
@@ -24,3 +24,4 @@ module "compute" {
  base_tags = local.base_tags
 }
 #*/
+
