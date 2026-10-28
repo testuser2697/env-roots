@@ -2,7 +2,7 @@ environments:
   governance:
     owners:
       - governance-admin
-      - bob
+      - testuser2697
 
   dev:
     owners:
@@ -11,6 +11,7 @@ environments:
   test:
     owners:
       - test-owner
+      - testuser2697
 
   prod:
     owners:
